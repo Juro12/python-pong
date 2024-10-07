@@ -99,22 +99,21 @@ if __name__ == '__main__':
             ruch_pilki = False
 
         # system kolizji gornej paletki
-        if pozycja_pilki[1] - promien_pilki <= pozycja_gornej[1] + szerokosc_paletki and pozycja_gornej[0] <= \
-                pozycja_pilki[0] <= pozycja_gornej[0] + dlugosc_paletki:
-            predkosc_pilki[1] = -predkosc_pilki[1]
-
         if (pozycja_pilki[1] - promien_pilki <= pozycja_gornej[1] + szerokosc_paletki and
-                (pozycja_pilki[0] - promien_pilki <= pozycja_gornej[0] or pozycja_pilki[0] + promien_pilki >= pozycja_gornej[0] + dlugosc_paletki)):
-            predkosc_pilki[0] = -predkosc_pilki[0]
+                pozycja_gornej[0] <= pozycja_pilki[0] <= pozycja_gornej[0] + dlugosc_paletki):
+            # Sprawdzamy, czy piłka jest już powyżej paletki, aby uniknąć cofania
+            if pozycja_pilki[1] >= pozycja_gornej[1] + szerokosc_paletki:
+                predkosc_pilki[1] = -predkosc_pilki[1]
+                pozycja_pilki[1] = pozycja_gornej[
+                                       1] + szerokosc_paletki + promien_pilki  # Upewnij się, że piłka jest poniżej paletki
 
         # system kolizji dolnej paletki
-        if pozycja_pilki[1] - promien_pilki >= pozycja_dolnej[1] - 2*szerokosc_paletki and pozycja_dolnej[0] <= \
-                pozycja_pilki[0] <= pozycja_dolnej[0] + dlugosc_paletki:
-            predkosc_pilki[1] = -predkosc_pilki[1]
-
         if (pozycja_pilki[1] + promien_pilki >= pozycja_dolnej[1] and
-                (pozycja_pilki[0] - promien_pilki <= pozycja_dolnej[0] or pozycja_pilki[0] + promien_pilki >= pozycja_dolnej[0] + dlugosc_paletki)):
-            predkosc_pilki[0] = -predkosc_pilki[0]
+                pozycja_dolnej[0] <= pozycja_pilki[0] <= pozycja_dolnej[0] + dlugosc_paletki):
+            # Sprawdzamy, czy piłka jest już poniżej paletki, aby uniknąć cofania
+            if pozycja_pilki[1] <= pozycja_dolnej[1]:
+                predkosc_pilki[1] = -predkosc_pilki[1]
+                pozycja_pilki[1] = pozycja_dolnej[1] - promien_pilki  # Upewnij się, że piłka jest powyżej paletki
 
         # rysowanie pilki na ekranie czemu blad chuj wi
         cv2.circle(img, pozycja_pilki, promien_pilki, 255, -1)
@@ -138,5 +137,3 @@ if __name__ == '__main__':
             break
 
     cv2.destroyAllWindows()
-
-    #koment
