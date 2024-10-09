@@ -65,7 +65,7 @@ class Pong:
 
     def wyswietl_wynik(self, plansza):
         wynik = str(self.gamer) + ":" + str(self.pc)
-        cv2.putText(plansza, wynik, (self.szerokosc // 2 - 20, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
+        cv2.putText(plansza, wynik, (self.szerokosc // 2 - 25, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
                     cv2.LINE_AA)
 
     def ruch_gornej_paletki(self):
