@@ -29,6 +29,8 @@ predkosc_paletki = 1
 pozycja_pilki = [szerokosc // 2, wysokosc // 2]
 predkosc_pilki = [2, 3]  # Prędkość w osi x i y
 
+trudnosc = [1, 1]
+
 if __name__ == '__main__':
     while True:
         # stworz plansze
@@ -45,14 +47,14 @@ if __name__ == '__main__':
 
             if abs(odleglosc_do_pilki) > 20:  # Jeśli piłka jest dalej niż 20 pikseli
                 if odleglosc_do_pilki < 0:
-                    pozycja_gornej[0] -= 1  # Szybszy ruch w lewo
+                    pozycja_gornej[0] -= trudnosc[0]  # Szybszy ruch w lewo
                 else:
-                    pozycja_gornej[0] += 1  # Szybszy ruch w prawo
+                    pozycja_gornej[0] += trudnosc[0]   # Szybszy ruch w prawo
             else:  # Wolniejsze ruchy, gdy blisko
                 if odleglosc_do_pilki < 0:
-                    pozycja_gornej[0] -= 1
+                    pozycja_gornej[0] -= trudnosc[1]
                 else:
-                    pozycja_gornej[0] += 1
+                    pozycja_gornej[0] += trudnosc[1]
 
             # Zapewnienie, że paletka górna nie wyjdzie poza ekran
             pozycja_gornej[0] = max(0, min(pozycja_gornej[0], szerokosc - dlugosc_paletki))
@@ -88,12 +90,14 @@ if __name__ == '__main__':
             predkosc_pilki[0] = -predkosc_pilki[0]
         # system kolizji ze scianami dolna i gorna, liczenie punktow i resetowanie pilki
         if pozycja_pilki[1] - promien_pilki <= 0:
-            pc += 1
+            gamer += 1
+            if gamer % 2 == 0:
+                trudnosc[0] += 1
             czas_startu = time.time()
             pozycja_pilki = [szerokosc // 2, 100]
             ruch_pilki = False
         if pozycja_pilki[1] + promien_pilki >= wysokosc:
-            gamer += 1
+            pc += 1
             czas_startu = time.time()
             pozycja_pilki = [szerokosc // 2, wysokosc - 100]
             ruch_pilki = False
