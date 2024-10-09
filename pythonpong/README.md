@@ -6,7 +6,7 @@ To prosta wersja klasycznej gry Pong, zaimplementowana w języku Python przy uż
 
 ## Menu
 
-![Menu gry](Zrzut_ekranu_menu.png)
+![Menu gry](screenshot/Zrzut_ekranu_menu.png)
 
 ## Funkcje
 
@@ -18,7 +18,7 @@ To prosta wersja klasycznej gry Pong, zaimplementowana w języku Python przy uż
 
 ## Screenshot
 
-![Screen z gry](screenshot\Zrzut ekranu gra.png)
+![Screen z gry](screenshot/Zrzut_ekranu_gra.png)
 
 ## Wymagania
 
