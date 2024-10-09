@@ -4,6 +4,10 @@
 
 To prosta wersja klasycznej gry Pong, zaimplementowana w języku Python przy użyciu biblioteki OpenCV. Gra zawiera tryb gry w którym jedna sterowana przez gracza, druga przez komputer. Piłka odbija się między paletkami i ścianami, a celem jest zdobycie punktów przez przepuszczenie piłki obok paletki przeciwnika. Co 5 punktów zdobytych przez gracza poziom trudności się zwiększa.
 
+## Menu
+
+![Menu gry](screenshot\Zrzut ekranu menu.png)
+
 ## Funkcje
 
 - Dwie paletki: jedna sterowana przez gracza, druga sterowana przez komputer.
@@ -11,6 +15,10 @@ To prosta wersja klasycznej gry Pong, zaimplementowana w języku Python przy uż
 - Prosty system punktacji, który śledzi punkty gracza i komputera.
 - Proste menu startowe z migającym tekstem zachęcającym do naciśnięcia "Enter" w celu rozpoczęcia gry.
 - Możliwość dostosowania poziomu trudności w miarę zdobywania punktów przez gracza.
+
+## Screenshot
+
+![Screen z gry](screenshot\Zrzut ekranu gra.png)
 
 ## Wymagania
 
