@@ -6,7 +6,7 @@ To prosta wersja klasycznej gry Pong, zaimplementowana w języku Python przy uż
 
 ## Menu
 
-![Menu gry](https://static.wikia.nocookie.net/gotoubunnohanayome/images/4/45/Nino_Nakano_Anime.png/revision/latest?cb=20190530175443&path-prefix=pl)
+![Menu gry](Zrzut_ekranu_menu.png)
 
 ## Funkcje
 
