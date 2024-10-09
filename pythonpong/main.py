@@ -57,12 +57,12 @@ class Pong:
         self.gamer = 0
         self.ruch_pilki = False
         self.czas_startu = time.time()
-        self.trudnosc = [1, 1]
+        self.trudnosc = [1+poziom, 1]
 
         # obiekty gry
         self.paletka_gorna = Paletka(szerokosc, wysokosc, 'g')
         self.paletka_dolna = Paletka(szerokosc, wysokosc)
-        self.pilka = Pilka(szerokosc, wysokosc, poziom+1, poziom+2)
+        self.pilka = Pilka(szerokosc, wysokosc, poziom + 1, poziom + 2)
 
     def wyswietl_wynik(self, plansza):
         wynik = str(self.gamer) + ":" + str(self.pc)
@@ -220,7 +220,8 @@ class Settings:
             img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
             for i, option in enumerate(menu_options):
                 color = (255, 255, 255) if i == selected_option else (100, 100, 100)
-                cv2.putText(img, option, (self.szerokosc // 2 - 50, 150 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA)
+                cv2.putText(img, option, (self.szerokosc // 2 - 50, 150 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color,
+                            2, cv2.LINE_AA)
 
             cv2.imshow('Pong', img)
 
@@ -231,6 +232,22 @@ class Settings:
                 selected_option = (selected_option - 1) % len(menu_options)
             elif key == 115:  # s
                 selected_option = (selected_option + 1) % len(menu_options)
+
+
+class Wyniki:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+
+    def wyswietl(self):
+        img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
+        cv2.putText(img, "Top 10", (self.szerokosc // 2 - 50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255),
+                    2, cv2.LINE_AA)
+        cv2.imshow('Pong', img)
+
+        key = cv2.waitKey(0) & 0xFF
+        if key == 27:  # esc
+            return False
 
 
 if __name__ == '__main__':
@@ -246,12 +263,15 @@ if __name__ == '__main__':
             while True:
                 if not game.gra():
                     break
+            wyniki = Wyniki()
+            while True:
+                if not wyniki.wyswietl():
+                    break
             break
         elif option == 1:  # Setting
             difficult = Settings()
             while True:
                 poziom = difficult.wyswietl()
                 break
-
 
     cv2.destroyAllWindows()
