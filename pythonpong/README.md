@@ -22,16 +22,16 @@ Uruchom plik main.py. Gra rozpocznie się od ekranu menu.
 
 ## Sterowanie
 
-*Naciśnij Enter, aby rozpocząć grę.
-*Użyj klawisza A, aby przesunąć dolną paletkę w lewo.
-*Użyj klawisza D, aby przesunąć dolną paletkę w prawo.
-*Naciśnij Esc w dowolnym momencie, aby zakończyć grę.
+*Naciśnij Enter, aby rozpocząć grę.*
+*Użyj klawisza A, aby przesunąć dolną paletkę w lewo.*
+*Użyj klawisza D, aby przesunąć dolną paletkę w prawo.*
+*Naciśnij Esc w dowolnym momencie, aby zakończyć grę.*
 
 ## Cel gry:
 
-*Kontroluj paletkę, aby utrzymać piłkę w grze.
-*Celem jest zdobycie punktów, przepuszczając piłkę obok paletki przeciwnika.
-*Gra staje się trudniejsza w miarę zdobywania punktów.
+*Kontroluj paletkę, aby utrzymać piłkę w grze.*
+*Celem jest zdobycie punktów, przepuszczając piłkę obok paletki przeciwnika.*
+*Gra staje się trudniejsza w miarę zdobywania punktów.*
 
 ## Autor
 
