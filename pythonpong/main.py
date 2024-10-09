@@ -3,6 +3,26 @@ import cv2
 import time
 
 
+def czytaj_plik_do_listy(nazwa_pliku):
+    dane = []
+    with open('wyniki.txt', 'r') as plik:
+        linie = plik.readlines()  # Odczytuje wszystkie linie
+
+        # Przetwarzanie linii, zakładając, że są pary: imię, wynik
+        for i in range(0, len(linie), 2):
+            imie = linie[i].strip()  # Usunięcie zbędnych białych znaków (np. nowych linii)
+            wynik = int(linie[i + 1].strip())  # Zamiana wyniku na liczbę całkowitą
+
+            # Dodanie pary (imię, wynik) do listy
+            dane.append((imie, wynik))
+
+    return dane
+
+
+def posortuj_dane(dane):
+    return sorted(dane, key=lambda x: x[1], reverse=True)
+
+
 class Paletka:
     def __init__(self, x, y, czy='d', dlugosc=100, szerokosc=5, predkosc=1):
         self.x = x // 2 - dlugosc // 2
@@ -57,7 +77,7 @@ class Pong:
         self.gamer = 0
         self.ruch_pilki = False
         self.czas_startu = time.time()
-        self.trudnosc = [1+poziom, 1]
+        self.trudnosc = [1 + poziom, 1]
 
         # obiekty gry
         self.paletka_gorna = Paletka(szerokosc, wysokosc, 'g')
@@ -240,9 +260,32 @@ class Wyniki:
         self.wysokosc = wysokosc
 
     def wyswietl(self):
+
+        dane = czytaj_plik_do_listy('dane.txt')
+        dane_posortowane = posortuj_dane(dane)
+
         img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
-        cv2.putText(img, "Top 10", (self.szerokosc // 2 - 50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255),
+        cv2.putText(img, "Top 10", (self.szerokosc // 2 - 50, 35), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255),
                     2, cv2.LINE_AA)
+
+        cv2.putText(img, f"Miejsce", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(img, f"Imie", (self.szerokosc // 2 - 60, 80), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(img, f"Punkty", (self.szerokosc - 115, 80), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (255, 255, 255), 2, cv2.LINE_AA)
+        i = 1
+        for imie, wynik in dane_posortowane:
+            cv2.putText(img, f"{i}", (10, 80 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                        (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(img, f"{imie}", (self.szerokosc // 2 - 60, 80 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                        (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(img, f"{wynik}", (self.szerokosc - 115, 80 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                        (255, 255, 255), 2, cv2.LINE_AA)
+            i += 1
+            if i == 11:
+                break
+
         cv2.imshow('Pong', img)
 
         key = cv2.waitKey(0) & 0xFF
