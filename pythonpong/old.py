@@ -2,140 +2,214 @@ import numpy as np
 import cv2
 import time
 
-# wymiary boiska
-szerokosc = 400
-wysokosc = 600
 
-# wymiary paletki
-dlugosc_paletki = 100
-szerokosc_paletki = 5
-promien_pilki = 10
+class Paletka:
+    def __init__(self, x, y, czy='d', dlugosc=100, szerokosc=5, predkosc=1):
+        self.x = x // 2 - dlugosc // 2
+        if czy == 'g':
+            self.y = 60
+        else:
+            self.y = y - 70
+        self.dlugosc = dlugosc
+        self.szerokosc = szerokosc
+        self.predkosc = predkosc
 
-# punktacja
-pc = 0
-gamer = 0
+    def ruch_w_lewo(self, predkosc):
+        self.x = max(0, self.x - predkosc)
 
-# zmienne ruchu pilki
-ruch_pilki = False
-czas_startu = time.time()
+    def ruch_w_prawo(self, predkosc, szerokosc_planszy):
+        self.x = min(szerokosc_planszy - self.dlugosc, self.x + predkosc)
 
-# paletki
-pozycja_gornej = [szerokosc // 2 - dlugosc_paletki // 2, 60]
-pozycja_dolnej = [szerokosc // 2 - dlugosc_paletki // 2, wysokosc - 70]
-predkosc_paletki = 1
+    def rysuj(self, plansza):
+        cv2.rectangle(plansza, (self.x, self.y), (self.x + self.dlugosc, self.y + self.szerokosc), 255, -1)
 
-# pilka
-pozycja_pilki = [szerokosc // 2, wysokosc // 2]
-predkosc_pilki = [2, 3]  # Prędkość w osi x i y
 
-trudnosc = [1, 1]
+class Pilka:
+    def __init__(self, x, y, promien=10, predkosc_x=2, predkosc_y=3):
+        self.x = x // 2
+        self.y = y // 2
+        self.promien = promien
+        self.predkosc_x = predkosc_x
+        self.predkosc_y = predkosc_y
 
-if __name__ == '__main__':
-    while True:
-        # stworz plansze
-        img = np.zeros((wysokosc, szerokosc), dtype=np.uint8)
+    def ruch(self):
+        self.x += self.predkosc_x
+        self.y += self.predkosc_y
 
-        # wyswietl wynik
-        wynik = str(gamer)+":"+str(pc)
-        cv2.putText(img, wynik, (szerokosc // 2 - 20, 30), cv2.FONT_HERSHEY_SIMPLEX,1, (255, 255, 255), 2, cv2.LINE_AA)
+    def odbicie_od_scian(self, szerokosc_planszy):
+        if self.x - self.promien <= 0 or self.x + self.promien >= szerokosc_planszy:
+            self.predkosc_x = -self.predkosc_x
 
+    def reset(self, x, y):
+        self.x = x
+        self.y = y
+
+    def rysuj(self, plansza):
+        cv2.circle(plansza, (self.x, self.y), self.promien, 255, -1)
+
+
+class Pong:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+        self.pc = 0
+        self.gamer = 0
+        self.ruch_pilki = False
+        self.czas_startu = time.time()
+        self.trudnosc = [1, 1]
+
+        # obiekty gry
+        self.paletka_gorna = Paletka(szerokosc, wysokosc, 'g')
+        self.paletka_dolna = Paletka(szerokosc, wysokosc)
+        self.pilka = Pilka(szerokosc, wysokosc)
+
+    def wyswietl_wynik(self, plansza):
+        wynik = str(self.gamer) + ":" + str(self.pc)
+        cv2.putText(plansza, wynik, (self.szerokosc // 2 - 25, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
+                    cv2.LINE_AA)
+
+    def ruch_gornej_paletki(self):
         # Ruch paletki przeciwnika
-        if pozycja_pilki[1] < wysokosc // 2:
+        if self.pilka.y < self.wysokosc // 2:
             # Obliczanie odległości do piłki
-            odleglosc_do_pilki = pozycja_pilki[0] - (pozycja_gornej[0] + dlugosc_paletki / 2)
+            self.odleglosc_do_pilki = self.pilka.x - (self.paletka_gorna.x + self.paletka_gorna.dlugosc / 2)
 
-            if abs(odleglosc_do_pilki) > 20:  # Jeśli piłka jest dalej niż 20 pikseli
-                if odleglosc_do_pilki < 0:
-                    pozycja_gornej[0] -= trudnosc[0]  # Szybszy ruch w lewo
+            if abs(self.odleglosc_do_pilki) > 20:  # Jeśli piłka jest dalej niż 20 pikseli
+                if self.odleglosc_do_pilki < 0:
+                    self.paletka_gorna.ruch_w_lewo(self.trudnosc[0])  # Szybszy ruch w lewo
                 else:
-                    pozycja_gornej[0] += trudnosc[0]   # Szybszy ruch w prawo
+                    self.paletka_gorna.ruch_w_prawo(self.trudnosc[0], self.szerokosc)  # Szybszy ruch w prawo
             else:  # Wolniejsze ruchy, gdy blisko
-                if odleglosc_do_pilki < 0:
-                    pozycja_gornej[0] -= trudnosc[1]
+                if self.odleglosc_do_pilki < 0:
+                    self.paletka_gorna.ruch_w_lewo(self.trudnosc[1])
                 else:
-                    pozycja_gornej[0] += trudnosc[1]
+                    self.paletka_gorna.ruch_w_prawo(self.trudnosc[1], self.szerokosc)
 
             # Zapewnienie, że paletka górna nie wyjdzie poza ekran
-            pozycja_gornej[0] = max(0, min(pozycja_gornej[0], szerokosc - dlugosc_paletki))
+            self.paletka_gorna.x = max(0, min(self.paletka_gorna.x, self.szerokosc - self.paletka_gorna.dlugosc))
 
         # ruch paletki przeciwnika gdy pilka na polowie gracza
-        elif pozycja_pilki[1] >= wysokosc // 2:
-            pozycja_gornej[0] += predkosc_paletki
-            if pozycja_gornej[0]+dlugosc_paletki == szerokosc:
-                predkosc_paletki = -predkosc_paletki
-            elif pozycja_gornej[0] == 0:
-                predkosc_paletki = -predkosc_paletki
+        elif self.pilka.y >= self.wysokosc // 2:
+            self.paletka_gorna.x += self.paletka_gorna.predkosc
+            if self.paletka_gorna.x + self.paletka_gorna.dlugosc == self.szerokosc or self.paletka_gorna.x == 0:
+                self.paletka_gorna.predkosc = -self.paletka_gorna.predkosc
 
-            # Zapewnienie, że paletka górna nie wyjdzie poza ekran
-            pozycja_gornej[0] = max(0, min(pozycja_gornej[0], szerokosc - dlugosc_paletki))
+            self.paletka_gorna.x = max(0, min(self.paletka_gorna.x, self.szerokosc - self.paletka_gorna.dlugosc))
 
-        # rysowanie paletek na ekranie
-        cv2.rectangle(img, pozycja_gornej, (pozycja_gornej[0] + dlugosc_paletki, pozycja_gornej[1] + szerokosc_paletki), 255, -1)
-        cv2.rectangle(img, pozycja_dolnej, (pozycja_dolnej[0] + dlugosc_paletki, pozycja_dolnej[1] + szerokosc_paletki), 255, -1)
+    def punktacja(self):
+        if self.pilka.y - self.pilka.promien <= 0:
+            self.gamer += 1
+            if self.gamer % 5 == 0:
+                self.trudnosc[0] += 1
+            self.czas_startu = time.time()
+            self.pilka.reset(self.szerokosc // 2, 100)
+            self.ruch_pilki = False
+        if self.pilka.y + self.pilka.promien >= self.wysokosc:
+            self.pc += 1
+            self.czas_startu = time.time()
+            self.pilka.reset(self.szerokosc // 2, self.wysokosc - 100)
+            self.ruch_pilki = False
 
-        # reset pozycji pilki i czas oczekiwania na rozpoczecie tury
-        if not ruch_pilki:
-            #pozycja_pilki = [szerokosc // 2, wysokosc // 2]
-            if time.time() - czas_startu >= 2:
-                ruch_pilki = True
-
-        # ruch pilki
-        if ruch_pilki:
-            pozycja_pilki[0] += predkosc_pilki[0]
-            pozycja_pilki[1] += predkosc_pilki[1]
-
-        # system kolizji ze scianami bocznymi
-        if pozycja_pilki[0] - promien_pilki <= 0 or pozycja_pilki[0] + promien_pilki >= szerokosc:
-            predkosc_pilki[0] = -predkosc_pilki[0]
-        # system kolizji ze scianami dolna i gorna, liczenie punktow i resetowanie pilki
-        if pozycja_pilki[1] - promien_pilki <= 0:
-            gamer += 1
-            if gamer % 2 == 0:
-                trudnosc[0] += 1
-            czas_startu = time.time()
-            pozycja_pilki = [szerokosc // 2, 100]
-            ruch_pilki = False
-        if pozycja_pilki[1] + promien_pilki >= wysokosc:
-            pc += 1
-            czas_startu = time.time()
-            pozycja_pilki = [szerokosc // 2, wysokosc - 100]
-            ruch_pilki = False
-
+    def kolizje(self):
         # system kolizji gornej paletki
-        if (pozycja_pilki[1] - promien_pilki <= pozycja_gornej[1] + szerokosc_paletki and
-                pozycja_gornej[0] <= pozycja_pilki[0] <= pozycja_gornej[0] + dlugosc_paletki):
-            # Sprawdzamy, czy piłka jest już powyżej paletki
-            if pozycja_pilki[1] >= pozycja_gornej[1] + szerokosc_paletki:
-                predkosc_pilki[1] = -predkosc_pilki[1]
-                pozycja_pilki[1] = pozycja_gornej[1] + szerokosc_paletki + promien_pilki
+        if (self.pilka.y - self.pilka.promien <= self.paletka_gorna.y + self.paletka_gorna.szerokosc and
+                self.paletka_gorna.x <= self.pilka.x <= self.paletka_gorna.x + self.paletka_gorna.dlugosc):
+            if self.pilka.y >= self.paletka_gorna.y + self.paletka_gorna.szerokosc:
+                self.pilka.predkosc_y = -self.pilka.predkosc_y
+                self.pilka.y = self.paletka_gorna.y + self.paletka_gorna.szerokosc + self.pilka.promien
 
         # system kolizji dolnej paletki
-        if (pozycja_pilki[1] + promien_pilki >= pozycja_dolnej[1] and
-                pozycja_dolnej[0] <= pozycja_pilki[0] <= pozycja_dolnej[0] + dlugosc_paletki):
-            # Sprawdzamy, czy piłka jest już poniżej paletki
-            if pozycja_pilki[1] <= pozycja_dolnej[1]:
-                predkosc_pilki[1] = -predkosc_pilki[1]
-                pozycja_pilki[1] = pozycja_dolnej[1] - promien_pilki
+        if (self.pilka.y + self.pilka.promien >= self.paletka_dolna.y and
+                self.paletka_dolna.x <= self.pilka.x <= self.paletka_dolna.x + self.paletka_dolna.dlugosc):
+            if self.pilka.y <= self.paletka_dolna.y:
+                self.pilka.predkosc_y = -self.pilka.predkosc_y
+                self.pilka.y = self.paletka_dolna.y - self.pilka.promien
 
-        # rysowanie pilki na ekranie czemu blad chuj wi
-        cv2.circle(img, pozycja_pilki, promien_pilki, 255, -1)
+    def gra(self):
 
-        #wyswietlenie okna
+        # stworz plansze
+        img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
+
+        self.wyswietl_wynik(img)
+        self.ruch_gornej_paletki()
+
+        self.paletka_gorna.rysuj(img)
+        self.paletka_dolna.rysuj(img)
+
+        # reset pozycji pilki i czas oczekiwania na rozpoczecie tury
+        if not self.ruch_pilki:
+            if time.time() - self.czas_startu >= 2:
+                self.ruch_pilki = True
+
+        # ruch pilki
+        if self.ruch_pilki:
+            self.pilka.ruch()
+
+        # system kolizji ze scianami bocznymi
+        self.pilka.odbicie_od_scian(self.szerokosc)
+
+        # system kolizji ze scianami gorna i dolna oraz liczenie punktow
+        self.punktacja()
+        self.kolizje()
+
+        # rysowanie pilki na ekranie
+        self.pilka.rysuj(img)
+
+        # wyswietlenie okna
         cv2.imshow('Pong', img)
 
         # oczekiwanie na wcisniecie przycisku
         key = cv2.waitKey(1) & 0xFF
-        if key == 97:
-            if pozycja_dolnej[0] > 0:
-                pozycja_dolnej[0] -= 10
-            if pozycja_dolnej[0] < 0:
-                pozycja_dolnej[0] = 0
-        if key == 100:
-            if pozycja_dolnej[0] + dlugosc_paletki < szerokosc:
-                pozycja_dolnej[0] += 10
-            if pozycja_dolnej[0] + dlugosc_paletki >= szerokosc:
-                pozycja_dolnej[0] = szerokosc - dlugosc_paletki
+        if key == 97:  # A
+            self.paletka_dolna.ruch_w_lewo(10)
+        if key == 100:  # D
+            self.paletka_dolna.ruch_w_prawo(10, self.szerokosc)
         if key == 27:  # Escape
+            return False
+        return True
+
+
+class Menu:
+    def __init__(self, szerokosc=400, wysokosc=600, tlo='menu.jpg'):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+        self.sciezka = tlo
+        self.tlo = cv2.imread(self.sciezka)
+
+    def wyswietl(self):
+        self.tlo = cv2.resize(self.tlo, (self.szerokosc, self.wysokosc))
+        cv2.putText(self.tlo, "PONG", (self.szerokosc // 2 - 80, 90), cv2.FONT_HERSHEY_SIMPLEX,
+                    2, (255, 255, 255), 8, cv2.LINE_AA)
+        cv2.putText(self.tlo, "Wcisnij Enter aby zagrac", (self.szerokosc // 2 - 155, self.wysokosc - 100),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(self.tlo, "Autor: Patryk Jureczko", (self.szerokosc // 2 - 20, self.wysokosc - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(self.tlo, "Ver. 0.3.1", (5, self.wysokosc - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
+
+        cv2.imshow('Pong', self.tlo)
+
+        while True:
+            key = cv2.waitKey(0) & 0xFF
+            if key == 13:  # Enter
+                return True
+            elif key == 27:  # Escape
+                return False
+            else:
+                continue
+
+
+if __name__ == '__main__':
+    menu = Menu()
+
+    while True:
+        if not menu.wyswietl():
+            break
+        else:
+            game = Pong()
+            while True:
+                if not game.gra():
+                    break
             break
 
     cv2.destroyAllWindows()

@@ -178,38 +178,51 @@ class Menu:
 
     def wyswietl(self):
         self.tlo = cv2.resize(self.tlo, (self.szerokosc, self.wysokosc))
-        cv2.putText(self.tlo, "PONG", (self.szerokosc // 2 - 80, 90), cv2.FONT_HERSHEY_SIMPLEX,
+        cv2.putText(self.tlo, "PONG", (self.szerokosc // 2 - 80, 60), cv2.FONT_HERSHEY_SIMPLEX,
                     2, (255, 255, 255), 8, cv2.LINE_AA)
-        cv2.putText(self.tlo, "Wcisnij Enter aby zagrac", (self.szerokosc // 2 - 155, self.wysokosc - 100),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.putText(self.tlo, "Autor: Patryk Jureczko", (self.szerokosc // 2 - 20, self.wysokosc - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.putText(self.tlo, "Ver. 0.3.1", (5, self.wysokosc - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
 
-        cv2.imshow('Pong', self.tlo)
-
+        menu_options = ["START", "SETTING", "EXIT"]
+        selected_option = 0
         while True:
+            img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
+            for i, option in enumerate(menu_options):
+                color = (255, 255, 255) if i == selected_option else (100, 100, 100)
+                cv2.putText(self.tlo, option, (self.szerokosc // 2 - 50, 175 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                            color, 2, cv2.LINE_AA)
+
+            cv2.imshow('Pong', self.tlo)
+
             key = cv2.waitKey(0) & 0xFF
-            if key == 13:  # Enter
-                return True
-            elif key == 27:  # Escape
-                return False
-            else:
-                continue
+            if key == 13:  # enter
+                print(selected_option)
+                return selected_option
+            elif key == 27:  # esc
+                return 2
+            elif key == 119:  # w
+                selected_option = (selected_option - 1) % len(menu_options)
+            elif key == 115:  # s
+                selected_option = (selected_option + 1) % len(menu_options)
 
 
 if __name__ == '__main__':
     menu = Menu()
 
     while True:
-        if not menu.wyswietl():
+        option = menu.wyswietl()
+        if option == 2:  # Exit
             break
-        else:
+        elif option == 0:  # Start
             game = Pong()
             while True:
                 if not game.gra():
                     break
             break
+        elif option == 1:  # Setting
+            # Obsługa ustawień (na razie pusta)
+            print("Settings menu not implemented yet.")
 
     cv2.destroyAllWindows()
