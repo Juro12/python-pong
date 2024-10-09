@@ -25,7 +25,7 @@ class Paletka:
 
 
 class Pilka:
-    def __init__(self, x, y, promien=10, predkosc_x=2, predkosc_y=3):
+    def __init__(self, x, y, predkosc_x, predkosc_y, promien=10):
         self.x = x // 2
         self.y = y // 2
         self.promien = promien
@@ -49,7 +49,8 @@ class Pilka:
 
 
 class Pong:
-    def __init__(self, szerokosc=400, wysokosc=600):
+    def __init__(self, poziom, szerokosc=400, wysokosc=600):
+        self.poziom = poziom
         self.szerokosc = szerokosc
         self.wysokosc = wysokosc
         self.pc = 0
@@ -61,7 +62,7 @@ class Pong:
         # obiekty gry
         self.paletka_gorna = Paletka(szerokosc, wysokosc, 'g')
         self.paletka_dolna = Paletka(szerokosc, wysokosc)
-        self.pilka = Pilka(szerokosc, wysokosc)
+        self.pilka = Pilka(szerokosc, wysokosc, poziom+1, poziom+2)
 
     def wyswietl_wynik(self, plansza):
         wynik = str(self.gamer) + ":" + str(self.pc)
@@ -188,7 +189,6 @@ class Menu:
         menu_options = ["START", "SETTING", "EXIT"]
         selected_option = 0
         while True:
-            img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
             for i, option in enumerate(menu_options):
                 color = (255, 255, 255) if i == selected_option else (100, 100, 100)
                 cv2.putText(self.tlo, option, (self.szerokosc // 2 - 50, 175 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
@@ -208,21 +208,50 @@ class Menu:
                 selected_option = (selected_option + 1) % len(menu_options)
 
 
+class Settings:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+
+    def wyswietl(self):
+        menu_options = ["EASY", "MEDIUM", "HARD"]
+        selected_option = 0
+        while True:
+            img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
+            for i, option in enumerate(menu_options):
+                color = (255, 255, 255) if i == selected_option else (100, 100, 100)
+                cv2.putText(img, option, (self.szerokosc // 2 - 50, 150 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA)
+
+            cv2.imshow('Pong', img)
+
+            key = cv2.waitKey(0) & 0xFF
+            if key == 13:  # enter
+                return selected_option
+            elif key == 119:  # w
+                selected_option = (selected_option - 1) % len(menu_options)
+            elif key == 115:  # s
+                selected_option = (selected_option + 1) % len(menu_options)
+
+
 if __name__ == '__main__':
     menu = Menu()
+    poziom = 1
 
     while True:
         option = menu.wyswietl()
         if option == 2:  # Exit
             break
         elif option == 0:  # Start
-            game = Pong()
+            game = Pong(poziom)
             while True:
                 if not game.gra():
                     break
             break
         elif option == 1:  # Setting
-            # Obsługa ustawień (na razie pusta)
-            print("Settings menu not implemented yet.")
+            difficult = Settings()
+            while True:
+                poziom = difficult.wyswietl()
+                break
+
 
     cv2.destroyAllWindows()
