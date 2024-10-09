@@ -58,7 +58,7 @@ class Pong:
         self.czas_startu = time.time()
         self.trudnosc = [1, 1]
 
-        #obiekty gry
+        # obiekty gry
         self.paletka_gorna = Paletka(szerokosc, wysokosc, 'g')
         self.paletka_dolna = Paletka(szerokosc, wysokosc)
         self.pilka = Pilka(szerokosc, wysokosc)
@@ -148,7 +148,7 @@ class Pong:
         # system kolizji ze scianami bocznymi
         self.pilka.odbicie_od_scian(self.szerokosc)
 
-        #system kolizji ze scianami gorna i dolna oraz liczenie punktow
+        # system kolizji ze scianami gorna i dolna oraz liczenie punktow
         self.punktacja()
         self.kolizje()
 
@@ -169,11 +169,47 @@ class Pong:
         return True
 
 
+class Menu:
+    def __init__(self, szerokosc=400, wysokosc=600, tlo='menu.jpg'):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+        self.sciezka = tlo
+        self.tlo = cv2.imread(self.sciezka)
+
+    def wyswietl(self):
+        self.tlo = cv2.resize(self.tlo, (self.szerokosc, self.wysokosc))
+        cv2.putText(self.tlo, "PONG", (self.szerokosc // 2 - 80, 90), cv2.FONT_HERSHEY_SIMPLEX,
+                    2, (255, 255, 255), 8, cv2.LINE_AA)
+        cv2.putText(self.tlo, "Wcisnij Enter aby zagrac", (self.szerokosc // 2 - 155, self.wysokosc - 100),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(self.tlo, "Autor: Patryk Jureczko", (self.szerokosc // 2 - 20, self.wysokosc - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(self.tlo, "Ver. 0.3.1", (5, self.wysokosc - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
+
+        cv2.imshow('Pong', self.tlo)
+
+        while True:
+            key = cv2.waitKey(0) & 0xFF
+            if key == 13:  # Enter
+                return True
+            elif key == 27:  # Escape
+                return False
+            else:
+                continue
+
+
 if __name__ == '__main__':
-    game = Pong()
+    menu = Menu()
 
     while True:
-        if not game.gra():
+        if not menu.wyswietl():
+            break
+        else:
+            game = Pong()
+            while True:
+                if not game.gra():
+                    break
             break
 
     cv2.destroyAllWindows()
