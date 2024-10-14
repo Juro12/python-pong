@@ -3,6 +3,31 @@ import cv2
 import time
 
 
+def czytaj_plik_do_listy(nazwa_pliku):
+    dane = []
+    with open('wyniki.txt', 'r') as plik:
+        linie = plik.readlines()  # Odczytuje wszystkie linie
+
+        # Przetwarzanie linii, zakładając, że są pary: imię, wynik
+        for i in range(0, len(linie), 2):
+            imie = linie[i].strip()  # Usunięcie zbędnych białych znaków (np. nowych linii)
+            wynik = int(linie[i + 1].strip())  # Zamiana wyniku na liczbę całkowitą
+
+            # Dodanie pary (imię, wynik) do listy
+            dane.append((imie, wynik))
+
+    return dane
+
+
+def posortuj_dane(dane):
+    return sorted(dane, key=lambda x: x[1], reverse=True)
+
+
+def zapisz_wynik_do_pliku(imie, wynik, nazwa_pliku):
+    with open(nazwa_pliku, 'a') as plik:
+        plik.write(f"{imie}\n{wynik}\n")  # Zapisz imię i wynik
+
+
 class Paletka:
     def __init__(self, x, y, czy='d', dlugosc=100, szerokosc=5, predkosc=1):
         self.x = x // 2 - dlugosc // 2
@@ -25,7 +50,7 @@ class Paletka:
 
 
 class Pilka:
-    def __init__(self, x, y, promien=10, predkosc_x=2, predkosc_y=3):
+    def __init__(self, x, y, predkosc_x, predkosc_y, promien=10):
         self.x = x // 2
         self.y = y // 2
         self.promien = promien
@@ -49,19 +74,20 @@ class Pilka:
 
 
 class Pong:
-    def __init__(self, szerokosc=400, wysokosc=600):
+    def __init__(self, poziom, szerokosc=400, wysokosc=600):
+        self.poziom = poziom
         self.szerokosc = szerokosc
         self.wysokosc = wysokosc
         self.pc = 0
         self.gamer = 0
         self.ruch_pilki = False
         self.czas_startu = time.time()
-        self.trudnosc = [1, 1]
+        self.trudnosc = [1 + poziom, 1]
 
         # obiekty gry
         self.paletka_gorna = Paletka(szerokosc, wysokosc, 'g')
         self.paletka_dolna = Paletka(szerokosc, wysokosc)
-        self.pilka = Pilka(szerokosc, wysokosc)
+        self.pilka = Pilka(szerokosc, wysokosc, poziom + 1, poziom + 2)
 
     def wyswietl_wynik(self, plansza):
         wynik = str(self.gamer) + ":" + str(self.pc)
@@ -178,38 +204,154 @@ class Menu:
 
     def wyswietl(self):
         self.tlo = cv2.resize(self.tlo, (self.szerokosc, self.wysokosc))
-        cv2.putText(self.tlo, "PONG", (self.szerokosc // 2 - 80, 90), cv2.FONT_HERSHEY_SIMPLEX,
+        cv2.putText(self.tlo, "PONG", (self.szerokosc // 2 - 80, 60), cv2.FONT_HERSHEY_SIMPLEX,
                     2, (255, 255, 255), 8, cv2.LINE_AA)
-        cv2.putText(self.tlo, "Wcisnij Enter aby zagrac", (self.szerokosc // 2 - 155, self.wysokosc - 100),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.putText(self.tlo, "Autor: Patryk Jureczko", (self.szerokosc // 2 - 20, self.wysokosc - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.putText(self.tlo, "Ver. 0.3.1", (5, self.wysokosc - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
 
-        cv2.imshow('Pong', self.tlo)
+        menu_options = ["START", "SETTING", "EXIT"]
+        selected_option = 0
+        while True:
+            for i, option in enumerate(menu_options):
+                color = (255, 255, 255) if i == selected_option else (100, 100, 100)
+                cv2.putText(self.tlo, option, (self.szerokosc // 2 - 50, 175 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                            color, 2, cv2.LINE_AA)
+
+            cv2.imshow('Pong', self.tlo)
+
+            key = cv2.waitKey(0) & 0xFF
+            if key == 13:  # enter
+                print(selected_option)
+                return selected_option
+            elif key == 27:  # esc
+                return 2
+            elif key == 119:  # w
+                selected_option = (selected_option - 1) % len(menu_options)
+            elif key == 115:  # s
+                selected_option = (selected_option + 1) % len(menu_options)
+
+
+class Settings:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+
+    def wyswietl(self):
+        menu_options = ["EASY", "MEDIUM", "HARD"]
+        selected_option = 0
+        while True:
+            img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
+            for i, option in enumerate(menu_options):
+                color = (255, 255, 255) if i == selected_option else (100, 100, 100)
+                cv2.putText(img, option, (self.szerokosc // 2 - 50, 150 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color,
+                            2, cv2.LINE_AA)
+
+            cv2.imshow('Pong', img)
+
+            key = cv2.waitKey(0) & 0xFF
+            if key == 13:  # enter
+                return selected_option
+            elif key == 119:  # w
+                selected_option = (selected_option - 1) % len(menu_options)
+            elif key == 115:  # s
+                selected_option = (selected_option + 1) % len(menu_options)
+
+
+class Wyniki:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+
+    def wyswietl(self):
+
+        dane = czytaj_plik_do_listy('dane.txt')
+        dane_posortowane = posortuj_dane(dane)
+
+        img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
+        cv2.putText(img, "Top 10", (self.szerokosc // 2 - 50, 35), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255),
+                    2, cv2.LINE_AA)
+
+        cv2.putText(img, f"Miejsce", (10, 80), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(img, f"Imie", (self.szerokosc // 2 - 60, 80), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(img, f"Punkty", (self.szerokosc - 115, 80), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                    (255, 255, 255), 2, cv2.LINE_AA)
+        i = 1
+        for imie, wynik in dane_posortowane:
+            cv2.putText(img, f"{i}", (10, 80 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                        (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(img, f"{imie}", (self.szerokosc // 2 - 60, 80 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                        (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.putText(img, f"{wynik}", (self.szerokosc - 115, 80 + i * 50), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                        (255, 255, 255), 2, cv2.LINE_AA)
+            i += 1
+            if i == 11:
+                break
+
+        cv2.imshow('Pong', img)
+
+        key = cv2.waitKey(0) & 0xFF
+        if key == 27:  # esc
+            return False
+
+
+class NazwaUzytkownika:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+        self.imie = ""
+
+    def wyswietl(self):
+        img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
+        cv2.putText(img, "Podaj swoje imie:", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(img, "Enter - zapisz", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(img, "Esc - wyjdz", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
 
         while True:
+            img_copy = img.copy()
+            cv2.putText(img_copy, self.imie, (85, 300), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 2, cv2.LINE_AA)
+            cv2.imshow('Pong', img_copy)
+
             key = cv2.waitKey(0) & 0xFF
             if key == 13:  # Enter
-                return True
+                return self.imie
+            elif key == 8:  # Backspace
+                self.imie = self.imie[:-1]
             elif key == 27:  # Escape
-                return False
-            else:
-                continue
+                return None
+            elif 32 <= key <= 126:  # Printable characters
+                if len(self.imie) < 10:
+                    self.imie += chr(key)
 
 
 if __name__ == '__main__':
     menu = Menu()
+    poziom = 1
 
     while True:
-        if not menu.wyswietl():
+        option = menu.wyswietl()
+        if option == 2:  # Exit
             break
-        else:
-            game = Pong()
+        elif option == 0:  # Start
+            game = Pong(poziom)
             while True:
                 if not game.gra():
+                    nazwa_uzytkownika = NazwaUzytkownika()
+                    imie = nazwa_uzytkownika.wyswietl()
+                    if imie is not None:
+                        zapisz_wynik_do_pliku(imie, game.gamer - game.pc, "wyniki.txt")
                     break
-            break
+            wyniki = Wyniki()
+            while True:
+                if not wyniki.wyswietl():
+                    break
+        elif option == 1:  # Setting
+            difficult = Settings()
+            while True:
+                poziom = difficult.wyswietl()
+                break
 
     cv2.destroyAllWindows()
