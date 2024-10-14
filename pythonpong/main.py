@@ -1,12 +1,11 @@
 import sys
 import pygame
-import numpy as np
 import time
 
 
 def czytaj_plik_do_listy(nazwa_pliku):
     dane = []
-    with open('wyniki.txt', 'r') as plik:
+    with open(nazwa_pliku, 'r') as plik:
         linie = plik.readlines()  # Odczytuje wszystkie linie
 
         # Przetwarzanie linii, zakładając, że są pary: imię, wynik
@@ -86,6 +85,7 @@ class Pong:
         self.ruch_pilki = False
         self.czas_startu = time.time()
         self.trudnosc = [1 + poziom, 1]
+        self.odleglosc_do_pilki = 0
 
         # obiekty gry
         self.paletka_gorna = Paletka(szerokosc, wysokosc, 'g')
@@ -155,7 +155,6 @@ class Pong:
 
     def gra(self):
         # stworz plansze
-        img = np.zeros((self.wysokosc, self.szerokosc, 3), dtype=np.uint8)  # Biała plansza
         plansza = pygame.display.set_mode((self.szerokosc, self.wysokosc))
         pygame.display.set_caption("Pong")
         clock = pygame.time.Clock()
@@ -327,7 +326,7 @@ class Wyniki:
         self.font_small = pygame.font.Font(None, 28)
 
     def wyswietl(self):
-        dane = czytaj_plik_do_listy('dane.txt')
+        dane = czytaj_plik_do_listy('wyniki.txt')
         dane_posortowane = posortuj_dane(dane)
 
         while True:
