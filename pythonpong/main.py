@@ -348,7 +348,6 @@ if __name__ == '__main__':
             while True:
                 if not wyniki.wyswietl():
                     break
-            break
         elif option == 1:  # Setting
             difficult = Settings()
             while True:
