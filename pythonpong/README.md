@@ -13,8 +13,10 @@ To prosta wersja klasycznej gry Pong, zaimplementowana w języku Python przy uż
 - Dwie paletki: jedna sterowana przez gracza, druga sterowana przez komputer.
 - Odbijająca się piłka z wykrywaniem kolizji z paletkami i ścianami.
 - Prosty system punktacji, który śledzi punkty gracza i komputera.
-- Proste menu startowe z migającym tekstem zachęcającym do naciśnięcia "Enter" w celu rozpoczęcia gry.
-- Możliwość dostosowania poziomu trudności w miarę zdobywania punktów przez gracza.
+- Proste menu startowe z możliwością rozpoczęcia gry, wejścia w ustawenia oraz zakończenia zabawy
+- 3 poziomy trudności 'easy', 'medium' i 'hard' do wyboru z poziomu ustawień
+- Możliwość zapisania swoich wyników wpisując z klawiatury swoją nazwę
+- Tabela Top 10 najlepszyhc wyników
 
 ## Screenshot
 
@@ -22,7 +24,7 @@ To prosta wersja klasycznej gry Pong, zaimplementowana w języku Python przy uż
 
 ## Wymagania
 
-Aby uruchomić grę, potrzebujesz zainstalowanego Pythona 3 oraz następujących biblioteki OpenCV
+Aby uruchomić grę, potrzebujesz zainstalowanego Pythona 3 oraz następujących biblioteki Pygame
 
 ## Jak uruchomić
 
@@ -30,18 +32,26 @@ Uruchom plik main.py. Gra rozpocznie się od ekranu menu.
 
 ## Sterowanie
 
-Naciśnij Enter, aby rozpocząć grę.<br>
+Wybierz opcję Start i zatwierdź enterem, aby rozpocząć grę.<br>
 Użyj klawisza A, aby przesunąć dolną paletkę w lewo.<br>
 Użyj klawisza D, aby przesunąć dolną paletkę w prawo.<br>
 Naciśnij Esc w dowolnym momencie, aby zakończyć grę.<br>
+Wpisz z klawiatury swoje imie aby zapisać wynik i zatwierdź enterem<br>
+
+## Zapisywanie wyniku
+
+![Zapisywanie wyniku](screenshot/Zrzut_ekranu_imie.png)
 
 ## Cel gry:
 
 Kontroluj paletkę, aby utrzymać piłkę w grze.<br>
 Celem jest zdobycie punktów, przepuszczając piłkę obok paletki przeciwnika.<br>
-Gra staje się trudniejsza w miarę zdobywania punktów.<br>
+
+## Top 10
+
+![Top 10](screenshot/Zrzut_ekranu_top.png)
 
 ## Autor
 
 **Patryk Jureczko**
-Wersja: 0.3.1
+Wersja: 0.4.4

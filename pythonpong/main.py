@@ -237,7 +237,7 @@ class Menu:
                              (self.szerokosc // 2 + 15, self.wysokosc - 20))
 
             # Rysowanie wersji
-            version_surface = self.ver_font.render("Ver. 0.4.2", True, (255, 255, 255))
+            version_surface = self.ver_font.render("Ver. 0.4.4", True, (255, 255, 255))
             self.screen.blit(version_surface, (5, self.wysokosc - 20))
 
             # Rysowanie opcji menu
