@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 import numpy as np
 import time
@@ -173,14 +175,131 @@ class Pong:
             clock.tick(60)  # 60 klatek na sekundę
 
 
+class Menu:
+    def __init__(self, szerokosc=400, wysokosc=600, tlo='menu.jpg'):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+        self.sciezka = tlo
+
+        # Inicjalizacja Pygame
+        pygame.init()
+
+        # Ustawienie ekranu
+        self.screen = pygame.display.set_mode((self.szerokosc, self.wysokosc))
+        pygame.display.set_caption('Pong')
+
+        # Wczytanie tła
+        self.tlo = pygame.image.load(self.sciezka)
+        self.tlo = pygame.transform.scale(self.tlo, (self.szerokosc, self.wysokosc))
+
+        # Ustawienia czcionek
+        self.font = pygame.font.Font(None, 36)
+        self.title_font = pygame.font.Font(None, 72)
+        self.ver_font = pygame.font.Font(None, 24)
+
+    def wyswietl(self):
+        menu_options = ["START", "SETTING", "EXIT"]
+        selected_option = 0
+
+        while True:
+            self.screen.blit(self.tlo, (0, 0))
+
+            # Rysowanie tytułu
+            title_surface = self.title_font.render("PONG", True, (255, 255, 255))
+            self.screen.blit(title_surface, (self.szerokosc // 2 - title_surface.get_width() // 2, 20))
+
+            # Rysowanie autora
+            author_surface = self.ver_font.render("Autor: Patryk Jureczko", True, (255, 255, 255))
+            self.screen.blit(author_surface,
+                             (self.szerokosc // 2 + 15, self.wysokosc - 20))
+
+            # Rysowanie wersji
+            version_surface = self.ver_font.render("Ver. 0.4.2", True, (255, 255, 255))
+            self.screen.blit(version_surface, (5, self.wysokosc - 20))
+
+            # Rysowanie opcji menu
+            for i, option in enumerate(menu_options):
+                color = (255, 255, 255) if i == selected_option else (100, 100, 100)
+                option_surface = self.font.render(option, True, color)
+                self.screen.blit(option_surface, (self.szerokosc // 2 - option_surface.get_width() // 2, 160 + i * 50))
+
+            # Aktualizacja ekranu
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:  # enter
+                        return selected_option
+                    elif event.key == pygame.K_ESCAPE:  # esc
+                        return 2
+                    elif event.key == pygame.K_w:  # w
+                        selected_option = (selected_option - 1) % len(menu_options)
+                    elif event.key == pygame.K_s:  # s
+                        selected_option = (selected_option + 1) % len(menu_options)
+
+
+class Settings:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+
+        # Inicjalizacja Pygame
+        pygame.init()
+
+        # Ustawienie ekranu
+        self.screen = pygame.display.set_mode((self.szerokosc, self.wysokosc))
+        pygame.display.set_caption('Pong - Settings')
+
+        # Ustawienia czcionek
+        self.font = pygame.font.Font(None, 48)
+
+    def wyswietl(self):
+        menu_options = ["EASY", "MEDIUM", "HARD"]
+        selected_option = 0
+
+        while True:
+            self.screen.fill((0, 0, 0))  # Wypełnij ekran czernią
+
+            # Rysowanie opcji menu
+            for i, option in enumerate(menu_options):
+                color = (255, 255, 255) if i == selected_option else (100, 100, 100)
+                option_surface = self.font.render(option, True, color)
+                self.screen.blit(option_surface, (self.szerokosc // 2 - option_surface.get_width() // 2, 150 + i * 50))
+
+            # Aktualizacja ekranu
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:  # enter
+                        return selected_option
+                    elif event.key == pygame.K_w:  # w
+                        selected_option = (selected_option - 1) % len(menu_options)
+                    elif event.key == pygame.K_s:  # s
+                        selected_option = (selected_option + 1) % len(menu_options)
+
+
 def main():
     pygame.init()
+    poziom = 1
 
-    poziom = 2
-
-    # Rozpoczęcie gry
-    gra = Pong(poziom)
-    gra.gra()
+    while True:
+        menu = Menu()
+        option = menu.wyswietl()
+        if option == 2:
+            break
+        elif option == 0:
+            gra = Pong(poziom)
+            gra.gra()
+        elif option == 1:
+            setting = Settings()
+            poziom = setting.wyswietl()
 
     pygame.quit()
 
