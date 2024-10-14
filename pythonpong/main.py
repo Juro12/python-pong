@@ -1,8 +1,32 @@
 import sys
-
 import pygame
 import numpy as np
 import time
+
+
+def czytaj_plik_do_listy(nazwa_pliku):
+    dane = []
+    with open('wyniki.txt', 'r') as plik:
+        linie = plik.readlines()  # Odczytuje wszystkie linie
+
+        # Przetwarzanie linii, zakładając, że są pary: imię, wynik
+        for i in range(0, len(linie), 2):
+            imie = linie[i].strip()  # Usunięcie zbędnych białych znaków (np. nowych linii)
+            wynik = int(linie[i + 1].strip())  # Zamiana wyniku na liczbę całkowitą
+
+            # Dodanie pary (imię, wynik) do listy
+            dane.append((imie, wynik))
+
+    return dane
+
+
+def posortuj_dane(dane):
+    return sorted(dane, key=lambda x: x[1], reverse=True)
+
+
+def zapisz_wynik_do_pliku(imie, wynik, nazwa_pliku):
+    with open(nazwa_pliku, 'a') as plik:
+        plik.write(f"{imie}\n{wynik}\n")  # Zapisz imię i wynik
 
 
 class Paletka:
@@ -285,6 +309,110 @@ class Settings:
                         selected_option = (selected_option + 1) % len(menu_options)
 
 
+class Wyniki:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+
+        # Inicjalizacja Pygame
+        pygame.init()
+
+        # Ustawienie ekranu
+        self.screen = pygame.display.set_mode((self.szerokosc, self.wysokosc))
+        pygame.display.set_caption('Pong - Wyniki')
+
+        # Ustawienia czcionek
+        self.font_large = pygame.font.Font(None, 48)
+        self.font_medium = pygame.font.Font(None, 36)
+        self.font_small = pygame.font.Font(None, 28)
+
+    def wyswietl(self):
+        dane = czytaj_plik_do_listy('dane.txt')
+        dane_posortowane = posortuj_dane(dane)
+
+        while True:
+            self.screen.fill((0, 0, 0))  # Wypełnij ekran czernią
+
+            # Nagłówek
+            title_surface = self.font_large.render("Top 10", True, (255, 255, 255))
+            self.screen.blit(title_surface, (self.szerokosc // 2 - title_surface.get_width() // 2, 20))
+
+            # Nagłówki kolumn
+            self.screen.blit(self.font_medium.render("Miejsce", True, (255, 255, 255)), (10, 70))
+            self.screen.blit(self.font_medium.render("Imie", True, (255, 255, 255)), (self.szerokosc // 2 - 60, 70))
+            self.screen.blit(self.font_medium.render("Punkty", True, (255, 255, 255)), (self.szerokosc - 115, 70))
+
+            # Rysowanie wyników
+            for i, (imie, wynik) in enumerate(dane_posortowane):
+                if i >= 10:  # Ograniczenie do 10 wyników
+                    break
+
+                self.screen.blit(self.font_small.render(f"{i + 1}", True, (255, 255, 255)), (10, 70 + (i + 1) * 50))
+                self.screen.blit(self.font_small.render(imie, True, (255, 255, 255)),
+                                 (self.szerokosc // 2 - 60, 70 + (i + 1) * 50))
+                self.screen.blit(self.font_small.render(str(wynik), True, (255, 255, 255)),
+                                 (self.szerokosc - 115, 70 + (i + 1) * 50))
+
+            pygame.display.flip()  # Aktualizacja ekranu
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:  # esc
+                        return False
+
+
+class NazwaUzytkownika:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+        self.imie = ""
+
+        # Inicjalizacja Pygame
+        pygame.init()
+
+        # Ustawienie ekranu
+        self.screen = pygame.display.set_mode((self.szerokosc, self.wysokosc))
+        pygame.display.set_caption('Pong - Nazwa Użytkownika')
+
+        # Ustawienia czcionek
+        self.font_large = pygame.font.Font(None, 48)
+        self.font_medium = pygame.font.Font(None, 36)
+        self.font_small = pygame.font.Font(None, 28)
+
+    def wyswietl(self):
+        while True:
+            self.screen.fill((0, 0, 0))  # Wypełnij ekran czernią
+
+            # Wyświetlanie instrukcji
+            self.screen.blit(self.font_large.render("Podaj swoje imie:", True, (255, 255, 255)), (50, 100))
+            self.screen.blit(self.font_small.render("Enter - zapisz", True, (255, 255, 255)), (50, 150))
+            self.screen.blit(self.font_small.render("Esc - wyjdz", True, (255, 255, 255)), (50, 200))
+
+            # Wyświetlanie wprowadzonego imienia
+            input_surface = self.font_large.render(self.imie, True, (255, 255, 255))
+            self.screen.blit(input_surface, (85, 300))
+
+            pygame.display.flip()  # Aktualizacja ekranu
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:  # Enter
+                        return self.imie
+                    elif event.key == pygame.K_BACKSPACE:  # Backspace
+                        self.imie = self.imie[:-1]
+                    elif event.key == pygame.K_ESCAPE:  # Escape
+                        return None
+                    elif event.unicode:  # Printable characters
+                        if len(self.imie) < 10:
+                            self.imie += event.unicode
+
+
 def main():
     pygame.init()
     poziom = 1
@@ -297,6 +425,12 @@ def main():
         elif option == 0:
             gra = Pong(poziom)
             gra.gra()
+            nazwa = NazwaUzytkownika()
+            imie = nazwa.wyswietl()
+            if imie is not None and imie != "":
+                zapisz_wynik_do_pliku(imie, gra.gamer - gra.pc, "wyniki.txt")
+            wyniki = Wyniki()
+            wyniki.wyswietl()
         elif option == 1:
             setting = Settings()
             poziom = setting.wyswietl()
