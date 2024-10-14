@@ -16,6 +16,8 @@ class Paletka:
 
     def ruch_w_lewo(self, predkosc):
         self.x = max(0, self.x - predkosc)
+        if self.x <= 0:
+            self.x = 1
 
     def ruch_w_prawo(self, predkosc, szerokosc_planszy):
         self.x = min(szerokosc_planszy - self.dlugosc, self.x + predkosc)
@@ -174,7 +176,7 @@ class Pong:
 def main():
     pygame.init()
 
-    poziom = 1
+    poziom = 2
 
     # Rozpoczęcie gry
     gra = Pong(poziom)
