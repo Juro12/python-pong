@@ -101,8 +101,6 @@ class Pong:
     def punktacja(self):
         if self.pilka.y - self.pilka.promien <= 0:
             self.gamer += 1
-            if self.gamer % 5 == 0:
-                self.trudnosc[0] += 1
             self.czas_startu = time.time()
             self.pilka.reset(self.szerokosc // 2, 100)
             self.ruch_pilki = False
@@ -176,7 +174,7 @@ class Pong:
 def main():
     pygame.init()
 
-    poziom = 0
+    poziom = 1
 
     # Rozpoczęcie gry
     gra = Pong(poziom)
