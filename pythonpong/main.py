@@ -23,6 +23,11 @@ def posortuj_dane(dane):
     return sorted(dane, key=lambda x: x[1], reverse=True)
 
 
+def zapisz_wynik_do_pliku(imie, wynik, nazwa_pliku):
+    with open(nazwa_pliku, 'a') as plik:
+        plik.write(f"{imie}\n{wynik}\n")  # Zapisz imię i wynik
+
+
 class Paletka:
     def __init__(self, x, y, czy='d', dlugosc=100, szerokosc=5, predkosc=1):
         self.x = x // 2 - dlugosc // 2
@@ -293,6 +298,35 @@ class Wyniki:
             return False
 
 
+class NazwaUzytkownika:
+    def __init__(self, szerokosc=400, wysokosc=600):
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+        self.imie = ""
+
+    def wyswietl(self):
+        img = np.zeros((self.wysokosc, self.szerokosc), dtype=np.uint8)
+        cv2.putText(img, "Podaj swoje imie:", (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        cv2.putText(img, "Enter - zapisz", (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(img, "Esc - wyjdz", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 1, cv2.LINE_AA)
+
+        while True:
+            img_copy = img.copy()
+            cv2.putText(img_copy, self.imie, (85, 300), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (255, 255, 255), 2, cv2.LINE_AA)
+            cv2.imshow('Pong', img_copy)
+
+            key = cv2.waitKey(0) & 0xFF
+            if key == 13:  # Enter
+                return self.imie
+            elif key == 8:  # Backspace
+                self.imie = self.imie[:-1]
+            elif key == 27:  # Escape
+                return None
+            elif 32 <= key <= 126:  # Printable characters
+                if len(self.imie) < 10:
+                    self.imie += chr(key)
+
+
 if __name__ == '__main__':
     menu = Menu()
     poziom = 1
@@ -305,6 +339,10 @@ if __name__ == '__main__':
             game = Pong(poziom)
             while True:
                 if not game.gra():
+                    nazwa_uzytkownika = NazwaUzytkownika()
+                    imie = nazwa_uzytkownika.wyswietl()
+                    if imie is not None:
+                        zapisz_wynik_do_pliku(imie, game.gamer - game.pc, "wyniki.txt")
                     break
             wyniki = Wyniki()
             while True:
