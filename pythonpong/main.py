@@ -83,6 +83,7 @@ class Przeszkoda(Paletka):
     def __init__(self, x, y, czy='d', predkosc=1, dlugosc=20, szerokosc=20):
         super().__init__(x, y, czy=czy, dlugosc=dlugosc, szerokosc=szerokosc, predkosc=predkosc)
         # Zmiana domyślnych wartości x i y, np. na środku planszy
+
         if czy == 'd':
             self.x = x - 22
             self.y = y // 2 - 50
@@ -90,6 +91,10 @@ class Przeszkoda(Paletka):
             self.x = 2
             self.y = y // 2 + 30
             self.predkosc = -self.predkosc
+
+        if predkosc == 0:
+            self.x = -50
+            self.y = -50
 
 
 class Pilka:
