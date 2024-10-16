@@ -30,6 +30,7 @@ def zapisz_wynik_do_pliku(imie, wynik, nazwa_pliku):
 
 class Paletka:
     def __init__(self, x, y, czy='d', dlugosc=100, szerokosc=5, predkosc=1):
+        self.pilka = None
         self.x = x // 2 - dlugosc // 2
         if czy == 'g':
             self.y = 60
@@ -49,6 +50,46 @@ class Paletka:
 
     def rysuj(self, plansza):
         pygame.draw.rect(plansza, (255, 255, 255), (self.x, self.y, self.dlugosc, self.szerokosc))
+
+    def kolizje(self, pilka_klasa):
+        self.pilka = pilka_klasa
+        if (self.pilka.y + self.pilka.promien >= self.y and
+                self.pilka.y - self.pilka.promien <= self.y + self.szerokosc and
+                self.pilka.x + self.pilka.promien >= self.x and
+                self.pilka.x - self.pilka.promien <= self.x + self.dlugosc):
+
+            # Kolizja z górą przeszkody
+            if self.pilka.y <= self.y:
+                self.pilka.predkosc_y = -self.pilka.predkosc_y
+                self.pilka.y = self.y - self.pilka.promien
+
+            # Kolizja z dołem przeszkody
+            elif self.pilka.y >= self.y + self.szerokosc:
+                self.pilka.predkosc_y = -self.pilka.predkosc_y
+                self.pilka.y = self.y + self.szerokosc + self.pilka.promien
+
+            # Kolizja z lewą stroną przeszkody
+            if self.pilka.x <= self.x:
+                self.pilka.predkosc_x = -self.pilka.predkosc_x
+                self.pilka.x = self.x - self.pilka.promien
+
+            # Kolizja z prawą stroną przeszkody
+            elif self.pilka.x >= self.x + self.dlugosc:
+                self.pilka.predkosc_x = -self.pilka.predkosc_x
+                self.pilka.x = self.x + self.dlugosc + self.pilka.promien
+
+
+class Przeszkoda(Paletka):
+    def __init__(self, x, y, czy='d', predkosc=1, dlugosc=20, szerokosc=20):
+        super().__init__(x, y, czy=czy, dlugosc=dlugosc, szerokosc=szerokosc, predkosc=predkosc)
+        # Zmiana domyślnych wartości x i y, np. na środku planszy
+        if czy == 'd':
+            self.x = x - 22
+            self.y = y // 2 - 50
+        elif czy == 'g':
+            self.x = 2
+            self.y = y // 2 + 30
+            self.predkosc = -self.predkosc
 
 
 class Pilka:
@@ -92,6 +133,9 @@ class Pong:
         self.paletka_dolna = Paletka(szerokosc, wysokosc)
         self.pilka = Pilka(szerokosc, wysokosc)
 
+        self.przeszkoda1 = Przeszkoda(szerokosc, wysokosc, 'g', poziom)
+        self.przeszkoda2 = Przeszkoda(szerokosc, wysokosc, 'd', poziom)
+
     def wyswietl_wynik(self, plansza):
         wynik = str(self.gamer) + ":" + str(self.pc)
         font = pygame.font.Font(None, 48)
@@ -126,6 +170,15 @@ class Pong:
 
             self.paletka_gorna.x = max(0, min(self.paletka_gorna.x, self.szerokosc - self.paletka_gorna.dlugosc))
 
+    def ruch_przeszkody(self):
+        self.przeszkoda1.x += self.przeszkoda1.predkosc
+        if self.przeszkoda1.x + self.przeszkoda1.dlugosc == self.szerokosc or self.przeszkoda1.x == 0:
+            self.przeszkoda1.predkosc = -self.przeszkoda1.predkosc
+
+        self.przeszkoda2.x += self.przeszkoda2.predkosc
+        if self.przeszkoda2.x + self.przeszkoda2.dlugosc == self.szerokosc or self.przeszkoda2.x == 0:
+            self.przeszkoda2.predkosc = -self.przeszkoda2.predkosc
+
     def punktacja(self):
         if self.pilka.y - self.pilka.promien <= 0:
             self.gamer += 1
@@ -137,21 +190,6 @@ class Pong:
             self.czas_startu = time.time()
             self.pilka.reset(self.szerokosc // 2, self.wysokosc - 100)
             self.ruch_pilki = False
-
-    def kolizje(self):
-        # system kolizji gornej paletki
-        if (self.pilka.y - self.pilka.promien <= self.paletka_gorna.y + self.paletka_gorna.szerokosc and
-                self.paletka_gorna.x <= self.pilka.x <= self.paletka_gorna.x + self.paletka_gorna.dlugosc):
-            if self.pilka.y >= self.paletka_gorna.y + self.paletka_gorna.szerokosc:
-                self.pilka.predkosc_y = -self.pilka.predkosc_y
-                self.pilka.y = self.paletka_gorna.y + self.paletka_gorna.szerokosc + self.pilka.promien
-
-        # system kolizji dolnej paletki
-        if (self.pilka.y + self.pilka.promien >= self.paletka_dolna.y and
-                self.paletka_dolna.x <= self.pilka.x <= self.paletka_dolna.x + self.paletka_dolna.dlugosc):
-            if self.pilka.y <= self.paletka_dolna.y:
-                self.pilka.predkosc_y = -self.pilka.predkosc_y
-                self.pilka.y = self.paletka_dolna.y - self.pilka.promien
 
     def gra(self):
         # stworz plansze
@@ -183,13 +221,19 @@ class Pong:
             self.pilka.odbicie_od_scian(self.szerokosc)
 
             self.punktacja()
-            self.kolizje()
+            self.przeszkoda1.kolizje(self.pilka)
+            self.przeszkoda2.kolizje(self.pilka)
+            self.paletka_gorna.kolizje(self.pilka)
+            self.paletka_dolna.kolizje(self.pilka)
             self.ruch_gornej_paletki()
+            self.ruch_przeszkody()
 
             # Rysowanie na planszy
             plansza.fill((0, 0, 0))  # Czarny kolor tła
             self.paletka_dolna.rysuj(plansza)
             self.paletka_gorna.rysuj(plansza)
+            self.przeszkoda1.rysuj(plansza)
+            self.przeszkoda2.rysuj(plansza)
             self.pilka.rysuj(plansza)
             self.wyswietl_wynik(plansza)
 
