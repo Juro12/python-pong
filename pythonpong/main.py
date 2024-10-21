@@ -332,9 +332,9 @@ class Pong:
                 break
 
             if self.paletka_gorna.dlugosc <= 0:
-                return True
+                return 1
             if self.paletka_dolna.dlugosc <= 0:
-                return False
+                return 2
 
             if not self.ruch_pilki and time.time() - self.czas_startu > 1:
                 self.ruch_pilki = True  # Rozpoczęcie ruchu piłki po 1 sekundzie
@@ -634,10 +634,10 @@ def main():
         elif option == 0:
             gra = Pong(poziom)
             lose = gra.gra()
-            if lose:
+            if lose == 1:
                 souls = Souls("You Win")
                 souls.wyswietl()
-            elif not lose:
+            elif lose == 2:
                 souls = Souls("You Died")
                 souls.wyswietl()
             nazwa = NazwaUzytkownika()
