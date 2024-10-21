@@ -24,13 +24,32 @@ def posortuj_dane(dane):
     return sorted(dane, key=lambda x: x[1], reverse=True)
 
 
+class Cechy:
+    def __init__(self, flaga):
+        match flaga:
+            # zwykla
+            case 0:
+                self.kolor = (255, 255, 255)
+                self.predkosc = (3, 4)
+
+            # gabka
+            case 1:
+                self.kolor = (98, 254, 0)
+                self.predkosc = (1, 2)
+
+            # kauczuk
+            case 2:
+                self.kolor = (0, 0, 255)
+                self.predkosc = (4, 5)
+
+
 def zapisz_wynik_do_pliku(imie, wynik, nazwa_pliku):
     with open(nazwa_pliku, 'a') as plik:
         plik.write(f"{imie}\n{wynik}\n")  # Zapisz imię i wynik
 
 
 class Paletka:
-    def __init__(self, x, y, czy='d', predkosc=1, dlugosc=100, szerokosc=5, erozja_szybkosc=5):
+    def __init__(self, x, y, flaga=0, czy='d', predkosc=1, dlugosc=100, szerokosc=5, erozja_szybkosc=5):
         self.pilka = None
         self.x = x // 2 - dlugosc // 2
         self.czy = czy
@@ -42,6 +61,9 @@ class Paletka:
         self.szerokosc = szerokosc
         self.predkosc = predkosc
         self.erozja_szybkosc = erozja_szybkosc  # Jak szybko paletka będzie się zużywać
+        self.flaga = flaga
+
+        self.cechy = Cechy(flaga)
 
     def ruch_w_lewo(self, predkosc):
         self.x = max(0, self.x - predkosc)
@@ -52,7 +74,7 @@ class Paletka:
         self.x = min(szerokosc_planszy - self.dlugosc, self.x + predkosc)
 
     def rysuj(self, plansza):
-        pygame.draw.rect(plansza, (255, 255, 255), (self.x, self.y, self.dlugosc, self.szerokosc))
+        pygame.draw.rect(plansza, self.cechy.kolor, (self.x, self.y, self.dlugosc, self.szerokosc))
 
     def kolizje(self, pilka_klasa):
         self.pilka = pilka_klasa
@@ -60,6 +82,16 @@ class Paletka:
                 self.pilka.y - self.pilka.promien <= self.y + self.szerokosc and
                 self.pilka.x + self.pilka.promien >= self.x and
                 self.pilka.x - self.pilka.promien <= self.x + self.dlugosc):
+
+            if self.pilka.predkosc_y < 0:
+                self.pilka.predkosc_y = -self.cechy.predkosc[1]
+            else:
+                self.pilka.predkosc_y = self.cechy.predkosc[1]
+
+            if self.pilka.predkosc_x < 0:
+                self.pilka.predkosc_x = -self.cechy.predkosc[0]
+            else:
+                self.pilka.predkosc_x = self.cechy.predkosc[0]
 
             # Kolizja z górą przeszkody
             if self.pilka.y <= self.y:
@@ -101,8 +133,8 @@ class Paletka:
 
 
 class Przeszkoda(Paletka):
-    def __init__(self, x, y, czy, predkosc=1, dlugosc=20, szerokosc=20):
-        super().__init__(x, y, czy=czy, dlugosc=dlugosc, szerokosc=szerokosc, predkosc=predkosc)
+    def __init__(self, x, y, flaga=0, czy="dp", predkosc=1, dlugosc=20, szerokosc=20):
+        super().__init__(x, y, flaga=flaga, czy=czy, dlugosc=dlugosc, szerokosc=szerokosc, predkosc=predkosc)
 
         if czy == 'dp':
             self.x = x - 22
@@ -179,12 +211,12 @@ class Pong:
         self.odleglosc_do_pilki = 0
 
         # obiekty gry
-        self.paletka_gorna = Paletka(szerokosc, wysokosc, 'g')
-        self.paletka_dolna = Paletka(szerokosc, wysokosc)
+        self.paletka_gorna = Paletka(szerokosc, wysokosc, random.randint(0, 2), 'g')
+        self.paletka_dolna = Paletka(szerokosc, wysokosc, random.randint(0, 2))
         self.pilka = Pilka(szerokosc, wysokosc)
 
-        self.przeszkoda1 = Przeszkoda(szerokosc, wysokosc, 'gp', poziom)
-        self.przeszkoda2 = Przeszkoda(szerokosc, wysokosc, 'dp', poziom)
+        self.przeszkoda1 = Przeszkoda(szerokosc, wysokosc, random.randint(0, 2), 'gp', poziom)
+        self.przeszkoda2 = Przeszkoda(szerokosc, wysokosc, random.randint(0, 2), 'dp', poziom)
         self.naprawa1 = Naprawa(self.szerokosc, self.wysokosc)
         self.naprawa2 = Naprawa(self.szerokosc, self.wysokosc, predkosc=-2)
 
