@@ -122,7 +122,7 @@ class Paletka:
             # Obliczenie, w którym miejscu paletka została uderzona
             lokalizacja_na_palecie = punkt_uderzenia - self.x
 
-            # Dzielimy paletkę na dwie części: lewą i prawą, od miejsca uderzenia
+            # Dzielimy paletkę na dwie części: lewą i prawą, od miejsca uderzeniaa
             if lokalizacja_na_palecie < self.dlugosc // 2:
                 # Zmniejszamy lewą część paletki
                 self.dlugosc -= self.erozja_szybkosc
