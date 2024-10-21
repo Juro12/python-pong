@@ -196,7 +196,25 @@ class Pong:
 
     def ruch_gornej_paletki(self):
         # Ruch paletki przeciwnika
-        if self.pilka.y < self.wysokosc // 2:
+        if self.paletka_gorna.dlugosc < 80 and self.szerokosc // 2 - 30 > self.naprawa2.y > 0:
+            # Obliczanie odległości do złotej piłki
+            odleglosc_do_zlotej_pilki = self.naprawa2.x - (
+                    self.paletka_gorna.x + self.paletka_gorna.dlugosc / 2)
+
+            if abs(odleglosc_do_zlotej_pilki) > 30:  # Jeśli złota piłka jest dalej niż 30 pikseli
+                if odleglosc_do_zlotej_pilki < 0:
+                    self.paletka_gorna.ruch_w_lewo(self.trudnosc[0])  # Szybszy ruch w lewo
+                else:
+                    self.paletka_gorna.ruch_w_prawo(self.trudnosc[0], self.szerokosc)  # Szybszy ruch w prawo
+            else:  # Wolniejsze ruchy, gdy blisko
+                if odleglosc_do_zlotej_pilki < 0:
+                    self.paletka_gorna.ruch_w_lewo(self.trudnosc[1])
+                else:
+                    self.paletka_gorna.ruch_w_prawo(self.trudnosc[1], self.szerokosc)
+
+            self.paletka_gorna.x = max(0, min(self.paletka_gorna.x, self.szerokosc - self.paletka_gorna.dlugosc))
+
+        elif self.pilka.y < self.wysokosc // 2:
             # Obliczanie odległości do piłki
             self.odleglosc_do_pilki = self.pilka.x - (self.paletka_gorna.x + self.paletka_gorna.dlugosc / 2)
 
