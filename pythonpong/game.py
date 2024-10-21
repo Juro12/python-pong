@@ -92,11 +92,15 @@ class Pong:
             self.czas_startu = time.time()
             self.pilka.reset(self.szerokosc // 2, 100)
             self.ruch_pilki = False
+            self.pilka.predkosc_y = -4
+            self.pilka.predkosc_x = -3
         if self.pilka.y + self.pilka.promien >= self.wysokosc:
             self.pc += 1
             self.czas_startu = time.time()
             self.pilka.reset(self.szerokosc // 2, self.wysokosc - 100)
             self.ruch_pilki = False
+            self.pilka.predkosc_y = 4
+            self.pilka.predkosc_x = 3
 
     def repair(self, plansza):
         self.naprawa1.rysuj(plansza)
