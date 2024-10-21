@@ -10,15 +10,25 @@ class Cechy:
                 self.kolor = (255, 255, 255)
                 self.predkosc = (3, 4)
 
-            # gabka
+            # gabka pochlania energie
             case 1:
-                self.kolor = (98, 254, 0)
+                self.kolor = (0, 128, 0)
                 self.predkosc = (1, 2)
 
-            # kauczuk
+            # kauczuk odbija sie szybciej
             case 2:
                 self.kolor = (0, 0, 255)
                 self.predkosc = (4, 5)
+
+            # elektrycznosc odbija sie bardziej na ukos
+            case 3:
+                self.kolor = (255, 255, 0)
+                self.predkosc = (6, 3)
+
+            # beton odbija sie bardziej prosto
+            case 4:
+                self.kolor = (125, 125, 125)
+                self.predkosc = (2, 5)
 
 
 class Paletka:

@@ -16,12 +16,12 @@ class Pong:
         self.odleglosc_do_pilki = 0
 
         # obiekty gry
-        self.paletka_gorna = Paletka(szerokosc, wysokosc, random.randint(0, 2), 'g')
-        self.paletka_dolna = Paletka(szerokosc, wysokosc, random.randint(0, 2))
+        self.paletka_gorna = Paletka(szerokosc, wysokosc, random.randint(0, 4), 'g')
+        self.paletka_dolna = Paletka(szerokosc, wysokosc, random.randint(0, 4))
         self.pilka = Pilka(szerokosc, wysokosc)
 
-        self.przeszkoda1 = Przeszkoda(szerokosc, wysokosc, random.randint(0, 2), 'gp', poziom)
-        self.przeszkoda2 = Przeszkoda(szerokosc, wysokosc, random.randint(0, 2), 'dp', poziom)
+        self.przeszkoda1 = Przeszkoda(szerokosc, wysokosc, random.randint(0, 4), 'gp', poziom)
+        self.przeszkoda2 = Przeszkoda(szerokosc, wysokosc, random.randint(0, 4), 'dp', poziom)
         self.naprawa1 = Naprawa(self.szerokosc, self.wysokosc)
         self.naprawa2 = Naprawa(self.szerokosc, self.wysokosc, predkosc=-2)
 
