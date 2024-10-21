@@ -197,7 +197,7 @@ class Pong:
     def ruch_gornej_paletki(self):
         # Ruch paletki przeciwnika
         if self.paletka_gorna.dlugosc < 80 and self.szerokosc // 2 - 30 > self.naprawa2.y > 0:
-            # Obliczanie odległości do złotej piłkii
+            # Obliczanie odległości do złotej piłki
             odleglosc_do_zlotej_pilki = self.naprawa2.x - (
                     self.paletka_gorna.x + self.paletka_gorna.dlugosc / 2)
 
@@ -298,6 +298,11 @@ class Pong:
                 self.paletka_dolna.ruch_w_prawo(4, self.szerokosc)
             if keys[pygame.K_ESCAPE]:
                 break
+
+            if self.paletka_gorna.dlugosc <= 0:
+                return True
+            if self.paletka_dolna.dlugosc <= 0:
+                return False
 
             if not self.ruch_pilki and time.time() - self.czas_startu > 1:
                 self.ruch_pilki = True  # Rozpoczęcie ruchu piłki po 1 sekundzie
@@ -549,6 +554,42 @@ class NazwaUzytkownika:
                             self.imie += event.unicode
 
 
+class Souls:
+    def __init__(self, text, szerokosc=400, wysokosc=600):
+        self.text = text
+        self.szerokosc = szerokosc
+        self.wysokosc = wysokosc
+
+        # Inicjalizacja Pygame
+        pygame.init()
+
+        # Ustawienie ekranu
+        self.screen = pygame.display.set_mode((self.szerokosc, self.wysokosc))
+        pygame.display.set_caption('Pong - Wyniki')
+
+        # Ustawienia czcionek
+        self.font = pygame.font.Font(None, 48)
+
+    def wyswietl(self):
+
+        while True:
+            self.screen.fill((0, 0, 0))  # Wypełnij ekran czernią
+
+            # Nagłówek
+            title_surface = self.font.render(self.text, True, (255, 255, 255))
+            self.screen.blit(title_surface, (self.szerokosc // 2 - title_surface.get_width() // 2, 100))
+
+            pygame.display.flip()  # Aktualizacja ekranu
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:  # esc
+                        return False
+
+
 def main():
     pygame.init()
     poziom = 1
@@ -560,7 +601,13 @@ def main():
             break
         elif option == 0:
             gra = Pong(poziom)
-            gra.gra()
+            lose = gra.gra()
+            if lose:
+                souls = Souls("You Win")
+                souls.wyswietl()
+            elif not lose:
+                souls = Souls("You Died")
+                souls.wyswietl()
             nazwa = NazwaUzytkownika()
             imie = nazwa.wyswietl()
             if imie is not None and imie != "":
