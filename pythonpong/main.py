@@ -197,7 +197,7 @@ class Pong:
     def ruch_gornej_paletki(self):
         # Ruch paletki przeciwnika
         if self.paletka_gorna.dlugosc < 80 and self.szerokosc // 2 - 30 > self.naprawa2.y > 0:
-            # Obliczanie odległości do złotej piłki
+            # Obliczanie odległości do złotej piłkii
             odleglosc_do_zlotej_pilki = self.naprawa2.x - (
                     self.paletka_gorna.x + self.paletka_gorna.dlugosc / 2)
 
